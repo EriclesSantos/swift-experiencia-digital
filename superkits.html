@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Super Kits</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .kit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    @media (max-width:980px){.kit-grid{grid-template-columns:1fr}}
+    .kit{background:#fff;border:1px solid #eee;border-radius:18px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+    .kit .imgwrap{aspect-ratio:16/9;background:#f3f4f6}
+    .kit .meta{padding:14px}
+    .kit .meta h3{margin:.2rem 0}
+    .kit ul{margin:8px 0 0 16px;color:#555}
+    .kit .buy{padding:14px;border-top:1px solid #eee;margin-top:auto;display:flex;justify-content:space-between;align-items:center}
+    .filter{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
+    .badge-tier{background:#111;color:#fff;border-radius:999px;padding:.2rem .55rem;font-size:.75rem}
+  </style>
+</head>
+<body>
+  <!-- Header via partial -->
+  <div data-include="partials/header.html"></div>
+
+  <main class="section">
+    <h2>Super Kits Swift</h2>
+
+    <div class="filter">
+      <button class="btn btn-primary" data-tier="all">Todos</button>
+      <button class="btn" data-tier="classico">Clássico</button>
+      <button class="btn" data-tier="familia">Família</button>
+      <button class="btn" data-tier="premium">Premium</button>
+      <input id="q" placeholder="Buscar kit..." style="margin-left:auto;min-width:220px">
+    </div>
+
+    <div id="kits" class="kit-grid"></div>
+  </main>
+
+  <!-- Footer via partial -->
+  <div data-include="partials/footer.html"></div>
+
+  <!-- seu JS global (carrinho/bot/etc.) -->
+  <script src="script/script.js"></script>
+
+  <!-- script específico da página -->
+  <script>
+    /* usa BRL global se existir; se não, usa fallback local */
+    const toBRL = window.BRL || (v => 'R$ ' + Number(v||0).toFixed(2).replace('.', ','));
+
+    // CONFIRA os arquivos em css/IMAGES/
+    // kitbasico.png | kitcompleto.png | kitcomerveja.png
+    const KITS = [
+      {
+        id: 901,
+        tier: 'classico',
+        name: 'Kit Clássico',
+        price: 149.90,
+        img: 'css/IMAGES/kitbasico.png',
+        items: ['Picanha 500g','Linguiça de Pernil 900g','Coxa/Sobrecoxa 1kg','Coca 2L']
+      },
+      {
+        id: 902,
+        tier: 'familia',
+        name: 'Kit Família',
+        price: 239.90,
+        img: 'css/IMAGES/kitcomcerveja.png',
+        items: ['Ancho 500g','Costelinha Suína 1kg','Salmão 500g','Heineken 6un','Sorvete 1L']
+      },
+      {
+        id: 903,
+        tier: 'premium',
+        name: 'Kit Premium',
+        price: 399.90,
+        img: 'css/IMAGES/kitcomcerveja.png', /* nome igual ao da sua pasta */
+        items: ['Picanha 1kg','Ancho 700g','Salmão 1kg','Vinho Tinto Seleção','Sorvete 1L']
+      }
+    ];
+
+    // addToCart de segurança (se abrir sem o script global)
+    if (typeof window.addToCart !== 'function') {
+      window.addToCart = (p)=>{
+        const KEY='SWIFT_CART';
+        const cart = JSON.parse(localStorage.getItem(KEY)||'[]');
+        const i = cart.findIndex(x=>x.id===p.id);
+        if(i>-1) cart[i].qty+=1; else cart.push({...p, qty:1});
+        localStorage.setItem(KEY, JSON.stringify(cart));
+        alert('Adicionado ao carrinho.');
+      };
+    }
+
+    function renderKits(tier='all', q=''){
+      const grid = document.getElementById('kits'); if(!grid) return;
+      const query = (q||'').toLowerCase();
+      grid.innerHTML = '';
+
+      KITS.filter(k =>
+        (tier==='all' || k.tier===tier) &&
+        (k.name.toLowerCase().includes(query) || k.items.join(' ').toLowerCase().includes(query))
+      ).forEach(k=>{
+        const el = document.createElement('article');
+        el.className = 'kit';
+        el.innerHTML = `
+          <div class="imgwrap">
+            <img alt="${k.name}" style="width:100%;height:100%;object-fit:cover">
+          </div>
+          <div class="meta">
+            <span class="badge-tier">${k.tier[0].toUpperCase()+k.tier.slice(1)}</span>
+            <h3>${k.name}</h3>
+            <ul>${k.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+          </div>
+          <div class="buy">
+            <div class="price">${toBRL(k.price)}</div>
+            <button class="btn btn-primary">COMPRAR KIT</button>
+          </div>
+        `;
+
+        const img = el.querySelector('img');
+        img.src = k.img;              // caminho DIRETO
+        img.onerror = () => img.remove(); // se errar o nome, não fica bloco cinza
+
+        el.querySelector('.btn-primary').onclick =
+          () => addToCart({ id:k.id, name:k.name, price:k.price, img:k.img });
+
+        grid.appendChild(el);
+      });
+
+      if (!grid.children.length) {
+        grid.innerHTML = `<div class="empty">Nenhum kit encontrado.</div>`;
+      }
+    }
+
+    function bootKits(){
+      const filterWrap = document.querySelector('.filter');
+      const q = document.getElementById('q');
+      if (!filterWrap || !q) { requestAnimationFrame(bootKits); return; }
+
+      filterWrap.querySelectorAll('.btn').forEach(b=>{
+        b.onclick = () => {
+          filterWrap.querySelectorAll('.btn').forEach(x=>x.classList.remove('btn-primary'));
+          b.classList.add('btn-primary');
+          renderKits(b.dataset.tier, q.value || '');
+        };
+      });
+
+      q.addEventListener('input', () => {
+        const active = filterWrap.querySelector('.btn.btn-primary');
+        renderKits(active ? active.dataset.tier : 'all', q.value);
+      });
+
+      renderKits('all', '');
+    }
+
+    document.addEventListener('DOMContentLoaded', bootKits);
+    window.addEventListener('load', bootKits);
+  </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clube Swift — Cadastro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    :root{--gold-1:#c89c25;--gold-2:#ffd166;--gold-3:#b58210;--soft:#0b0b0b;--line:rgba(255,209,102,.18)}
+    body{background:#000;color:#fff;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    .mini-hero{background-image:linear-gradient(to bottom,rgba(0,0,0,.55),rgba(0,0,0,.65)),url('https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1600&auto=format&fit=crop');background-size:cover;background-position:center}
+    .mini-hero .inner{max-width:1100px;margin:auto;padding:60px 16px;text-align:center;border-bottom:1px solid rgba(255,209,102,.2)}
+    .mini-hero h1{font-family:Montserrat;font-size:80px;color:transparent;-webkit-text-stroke:3px rgba(184,142,20,.95);margin:0}
+    .wrap{max-width:1100px;margin:18px auto;padding:0 16px}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:#0b0b0b;border:1px solid var(--line);border-radius:16px;padding:16px}
+    .card h2,.card h3{margin:.2rem 0 .6rem;font-family:Montserrat;color:var(--gold-2)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field input,.field select,.field textarea{background:#0e0e0e;border:1px solid #1f1f1f;color:#fff;border-radius:12px;padding:.8rem .9rem}
+    .btn-gold{background:linear-gradient(90deg,var(--gold-1),var(--gold-2),var(--gold-3));color:#000;border:none;border-radius:12px;padding:.85rem 1.2rem;font-weight:900}
+    .btn-ghost-dark{background:#161616;color:#fff;border:1px solid #222;border-radius:12px;padding:.85rem 1.2rem;font-weight:800}
+    .toast{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);z-index:9999}
+    .toast .box{background:#0b0b0b;border:1px solid var(--line);border-radius:16px;padding:24px;max-width:520px;text-align:center}
+  </style>
+</head>
+<body>
+  <div data-include="partials/header.html"></div>
+
+  <section class="mini-hero">
+    <div class="inner">
+      <h1>CLUBE</h1>
+      <p>Complete seus dados para ativar benefícios (cashback, Dia do Clube, combos do mês, frete e mais).</p>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div class="grid">
+      <div class="card">
+        <h2>Cadastro</h2>
+        <form id="formClube" class="form" autocomplete="on">
+          <div class="row">
+            <div class="field"><label>Nome *</label><input required name="nome" placeholder="Seu nome"></div>
+            <div class="field"><label>E-mail *</label><input required type="email" name="email" placeholder="voce@exemplo.com"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>WhatsApp</label><input name="whats" placeholder="(11) 9 9999-9999"></div>
+            <div class="field"><label>CPF</label><input name="cpf" placeholder="000.000.000-00"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Nascimento</label><input name="aniversario" placeholder="dd/mm/aaaa"></div>
+            <div class="field"><label>CEP</label><input name="cep" placeholder="00000-000"></div>
+          </div>
+          <div class="field"><label>Endereço</label><input name="endereco" placeholder="Rua, número, complemento"></div>
+          <div class="row">
+            <div class="field">
+              <label>Preferências</label>
+              <select name="preferencias">
+                <option value="">Selecione…</option>
+                <option>Bovinos</option><option>Aves</option><option>Suínos</option>
+                <option>Pescados</option><option>Linguíças</option><option>Churrasco</option>
+                <option>100% Vegetal</option><option>Snacks</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Consumo mensal</label>
+              <select name="consumo">
+                <option value="">Selecione…</option>
+                <option>Até R$ 150</option><option>R$ 150–300</option><option>R$ 300–600</option>
+                <option>R$ 600–1000</option><option>R$ 1000+</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Observações</label><textarea name="obs" placeholder="Ex.: preferimos cortes magros"></textarea></div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
+            <a class="btn-ghost-dark" href="./clube.html">Voltar</a>
+            <button class="btn-gold" type="submit">Fazer parte</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Vantagens resumidas</h3>
+        <ul style="margin:0 0 12px 18px">
+          <li>Cashback automático no carrinho (R$10 a cada R$100).</li>
+          <li>Dia do Clube 2x/mês com 10% OFF.</li>
+          <li>Combos do mês com acesso antecipado.</li>
+          <li>Frete grátis (regiões) a partir de R$199.</li>
+          <li>Se atrasar, cupom liberado no rastreio.</li>
+          <li>Níveis Bronze/Prata/Ouro com benefícios progressivos.</li>
+        </ul>
+        <p style="margin-top:8px;color:#bbb">Depois de enviar, aparece uma confirmação — você pode voltar para a Home ou abrir “Minha Conta”.</p>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <div class="box">
+      <h3 style="color:#ffd166;font-family:Montserrat;margin:0 0 6px">Inscrição enviada com sucesso 🎉</h3>
+      <p style="margin:0 0 12px">Seus benefícios serão ativados na próxima compra.</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <a class="btn btn-primary" href="./home.html">Ir para a Home</a>
+        <a class="btn-ghost-dark" href="./minhaconta.html">Ver Minha Conta</a>
+      </div>
+    </div>
+  </div>
+
+  <div data-include="partials/footer.html"></div>
+  <script src="./script/script.js"></script>
+</body>
+</html>

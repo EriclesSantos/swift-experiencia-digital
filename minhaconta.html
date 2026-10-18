@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha Conta — Swift</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .dash{max-width:1200px;margin:1rem auto;padding:0 1rem}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:12px 0 18px}
+    .kpi{background:#f8fafc;border:1px solid #eef0f2;border-radius:14px;padding:16px}
+    .kpi h4{margin:.1rem 0 .35rem}
+    .charts{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+    .cardx{background:#fff;border:1px solid #eee;border-radius:16px;padding:14px;box-shadow:0 10px 24px rgba(0,0,0,.05)}
+    @media (max-width:960px){.charts{grid-template-columns:1fr}.kpis{grid-template-columns:1fr}}
+    .orders{margin-top:18px}
+    .orders table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .orders td,.orders th{padding:10px;background:#fff;border:1px solid #eee}
+    .orders th{background:#f3f4f6;text-align:left}
+  </style>
+  <!-- Chart.js para os gráficos desta página -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div data-include="partials/header.html"></div>
+
+  <main class="dash">
+    <h2>Olá, Swift Lover 👋</h2>
+
+    <div class="kpis">
+      <div class="kpi">
+        <h4>Gasto no mês</h4>
+        <div style="font-weight:900;font-size:1.4rem">R$ <span id="kpi-mes">0,00</span></div>
+        <small class="muted">com Clube Swift</small>
+      </div>
+      <div class="kpi">
+        <h4>Cashback acumulado</h4>
+        <div style="font-weight:900;font-size:1.4rem">R$ <span id="kpi-cash">0,00</span></div>
+        <small class="muted">R$10 a cada R$100 em compras</small>
+      </div>
+      <div class="kpi">
+        <h4>Economia no ano (proj.)</h4>
+        <div style="font-weight:900;font-size:1.4rem">R$ <span id="kpi-econ">0,00</span></div>
+        <small class="muted">considerando Clube + descontos</small>
+      </div>
+    </div>
+
+    <div class="charts">
+      <div class="cardx">
+        <h3>Pedidos por mês</h3>
+        <canvas id="chartPedidos" height="140"></canvas>
+      </div>
+      <div class="cardx">
+        <h3>Projeção de gasto anual</h3>
+        <canvas id="chartProjecao" height="140"></canvas>
+      </div>
+    </div>
+
+    <div class="orders">
+      <h3>Seus pedidos</h3>
+      <table>
+        <thead><tr><th>#</th><th>Data</th><th>Itens</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="tbl-pedidos"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <div data-include="partials/footer.html"></div>
+
+  <!-- seu JS global (onde já existe BRL) -->
+  <script src="script/script.js"></script>
+
+  <!-- script específico desta página (sem colidir com BRL global) -->
+  <script>
+    // dados fake só para demo
+    const pedidos = [
+      {id:10328, data:'2025-09-30', itens:6, total:238.70, status:'Em rota'},
+      {id:10293, data:'2025-09-22', itens:4, total:189.90, status:'Entregue'},
+      {id:10210, data:'2025-08-18', itens:5, total:214.40, status:'Entregue'},
+      {id:10167, data:'2025-07-25', itens:3, total:142.50, status:'Entregue'},
+      {id:10122, data:'2025-06-12', itens:4, total:171.30, status:'Entregue'},
+      {id:10088, data:'2025-05-28', itens:6, total:256.10, status:'Entregue'}
+    ];
+
+    // helper local sem conflito
+    const fmt = v => Number(v||0).toFixed(2).replace('.', ',');
+
+    // roda tudo depois que header/footer carregarem
+    document.addEventListener('DOMContentLoaded', () => {
+      // KPIs
+      (function kpis(){
+        const mesAtual = new Date().toISOString().slice(0,7);
+        const gastoMes = pedidos.filter(p => p.data.startsWith(mesAtual)).reduce((s,p)=>s+p.total,0);
+        const gastoAno = pedidos.reduce((s,p)=>s+p.total,0);
+        const cashback = Math.floor(gastoAno/100)*10;
+        const ult3 = pedidos.slice(0).sort((a,b)=> new Date(b.data)-new Date(a.data)).slice(0,3).reduce((s,p)=>s+p.total,0) / 3 || 0;
+        const projBruto = ult3 * 12, economiaClube = projBruto * 0.08;
+
+        document.getElementById('kpi-mes').textContent  = fmt(gastoMes);
+        document.getElementById('kpi-cash').textContent = fmt(cashback);
+        document.getElementById('kpi-econ').textContent = fmt(economiaClube);
+      })();
+
+      // Tabela
+      (function tabela(){
+        const tb = document.getElementById('tbl-pedidos'); tb.innerHTML = '';
+        pedidos.sort((a,b)=> new Date(b.data)-new Date(a.data))
+          .forEach(p=>{
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>#${p.id}</td>
+              <td>${p.data.split('-').reverse().join('/')}</td>
+              <td>${p.itens}</td>
+              <td>R$ ${fmt(p.total)}</td>
+              <td><span class="badge">${p.status}</span></td>
+              <td><a class="btn btn-primary" href="rastreio.html">Rastrear</a></td>
+            `;
+            tb.appendChild(tr);
+          });
+      })();
+
+      // Gráficos
+      (function charts(){
+        if (typeof Chart === 'undefined') return; // segurança
+
+        const map = {};
+        pedidos.forEach(p=>{
+          const ym = p.data.slice(0,7);
+          map[ym] = (map[ym]||0) + p.total;
+        });
+        const labels = Object.keys(map).sort();
+        const data = labels.map(l=> map[l]);
+
+        new Chart(document.getElementById('chartPedidos'),{
+          type:'bar',
+          data:{ labels, datasets:[{ label:'R$', data, borderWidth:1 }]},
+          options:{ scales:{ y:{ beginAtZero:true } } }
+        });
+
+        const ult3 = pedidos.slice(0).sort((a,b)=> new Date(b.data)-new Date(a.data)).slice(0,3).reduce((s,p)=>s+p.total,0) / 3 || 0;
+        const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        const projBruto = Array(12).fill(ult3);
+        const projLiquido = projBruto.map(v=> v*0.92);
+
+        new Chart(document.getElementById('chartProjecao'),{
+          type:'line',
+          data:{ labels: meses, datasets:[
+            { label:'Bruto', data:projBruto, tension:.35 },
+            { label:'Líquido (c/ Clube)', data:projLiquido, tension:.35 }
+          ]},
+          options:{ scales:{ y:{ beginAtZero:true } } }
+        });
+      })();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Swift — Pagamento</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .pay-wrap{max-width:1100px;margin:1rem auto;padding:0 1rem;display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+    @media (max-width:980px){.pay-wrap{grid-template-columns:1fr}}
+    .pay-card{background:#fff;border:1px solid #eee;border-radius:16px;box-shadow:var(--shadow);padding:14px}
+    .methods{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .method{border:1px solid #e6e8ea;border-radius:12px;padding:12px;font-weight:800;text-align:center;cursor:pointer}
+    .method.active{border-color:var(--swift);box-shadow:0 0 0 3px rgba(230,74,25,.14)}
+    .formline{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .resume .row{display:flex;justify-content:space-between;margin:.35rem 0}
+    .resume .row.total{font-weight:900}
+  </style>
+</head>
+<body>
+  <div data-include="partials/header.html"></div>
+
+  <section class="section">
+    <div class="progress-inline"><span>Carrinho</span><span>Endereço</span><span class="active">Pagamento</span></div>
+  </section>
+
+  <main class="pay-wrap">
+    <div class="pay-card">
+      <h3>Formas de pagamento</h3>
+      <div class="methods">
+        <div class="method active" data-m="pix">Pix</div>
+        <div class="method" data-m="boleto">Boleto</div>
+        <div class="method" data-m="credito">Cartão de Crédito</div>
+      </div>
+
+      <div id="form-pix" class="form" style="margin-top:10px">
+        <div class="formline"><input placeholder="Nome completo"><input placeholder="CPF"></div>
+        <div class="formline"><input placeholder="E-mail"><input placeholder="Telefone"></div>
+        <p style="margin:.6rem 0 0;color:#666">O QR Code será exibido na próxima etapa.</p>
+      </div>
+
+      <div id="form-boleto" class="form" style="display:none;margin-top:10px">
+        <div class="formline"><input placeholder="Nome completo"><input placeholder="CPF/CNPJ"></div>
+        <div class="formline"><input placeholder="E-mail para envio do boleto"><input placeholder="Telefone"></div>
+      </div>
+
+      <div id="form-credito" class="form" style="display:none;margin-top:10px">
+        <div class="formline"><input placeholder="Número do cartão"><input placeholder="Nome impresso"></div>
+        <div class="formline"><input placeholder="Validade (MM/AA)"><input placeholder="CVV"></div>
+        <div class="formline"><select><option>1x</option><option>2x</option><option>3x</option><option>4x</option><option>5x</option><option>6x</option></select><input placeholder="CPF do titular"></div>
+      </div>
+
+      <div style="text-align:right;margin-top:14px">
+        <button id="btnFinalize" class="next">Finalizar pedido</button>
+      </div>
+    </div>
+
+    <aside class="pay-card resume">
+      <h3>Resumo</h3>
+      <div class="row"><span>Subtotal</span><span id="r-sub">R$ 0,00</span></div>
+      <div class="row"><span>Frete</span><span id="r-fre">R$ 12,90</span></div>
+      <div class="row"><span>Descontos</span><span id="r-off">- R$ 0,00</span></div>
+      <div class="row total"><span>Total</span><span id="r-tot">R$ 0,00</span></div>
+      <p style="margin:.6rem 0 0;color:#666">Frete grátis acima de <b>R$ 199</b>. Clube Swift aplica descontos automaticamente.</p>
+    </aside>
+  </main>
+
+  <div data-include="partials/footer.html"></div>
+  <script src="script/script.js"></script>
+  <script>
+    document.querySelectorAll('.method').forEach(m=>{
+      m.onclick=()=>{
+        document.querySelectorAll('.method').forEach(x=>x.classList.remove('active')); m.classList.add('active');
+        ['pix','boleto','credito'].forEach(k=> document.getElementById('form-'+k).style.display='none');
+        document.getElementById('form-'+m.dataset.m).style.display='block';
+      };
+    });
+    (function resumo(){
+      const cart = JSON.parse(localStorage.getItem('SWIFT_CART')||'[]');
+      const sub = cart.reduce((s,i)=>s+i.price*i.qty,0);
+      const frete = sub>=199? 0 : 12.9;
+      const desc = 0;
+      const tot = sub + frete - desc;
+      const BRL = v => 'R$ '+v.toFixed(2).replace('.',',');
+      document.getElementById('r-sub').textContent=BRL(sub);
+      document.getElementById('r-fre').textContent=BRL(frete);
+      document.getElementById('r-off').textContent='- '+BRL(desc).replace('R$ ','');
+      document.getElementById('r-tot').textContent=BRL(tot);
+    })();
+    document.getElementById('btnFinalize').onclick=()=>alert('Pedido finalizado! (demo)');
+  </script>
+</body>
+</html>

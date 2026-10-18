@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clientes do Clube — Swift</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    .wrap{max-width:1200px;margin:1rem auto;padding:0 1rem}
+    .toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:10px 0 16px}
+    .toolbar input{border:1px solid #e3e6ea;border-radius:10px;padding:.6rem .8rem;min-width:240px}
+    .btn-sm{padding:.55rem .8rem;border-radius:10px;border:none;background:#eee}
+    .cardx{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+    .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+    @media (max-width:960px){.grid{grid-template-columns:1fr}}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    th,td{background:#fff;border:1px solid #eee;padding:10px;text-align:left}
+    th{background:#f5f6f8}
+    .muted{color:#666;font-size:.9rem}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div data-include="partials/header.html"></div>
+
+  <main class="wrap">
+    <h2>Clientes do Clube</h2>
+    <p class="muted">Dados salvos localmente neste protótipo.</p>
+
+    <div class="toolbar">
+      <div><input id="q" placeholder="Buscar por nome, e-mail, CEP…"> <button class="btn-sm" id="sort">Ordenar por data</button></div>
+      <button class="btn-sm" id="export">Exportar CSV</button>
+    </div>
+
+    <div class="grid">
+      <div class="cardx">
+        <h3>Cadastros</h3>
+        <table>
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Whats</th><th>CEP</th><th>Preferência</th><th>Consumo</th><th>Criado em</th></tr></thead>
+        <tbody id="rows"></tbody>
+        </table>
+        <p class="muted" id="empty" style="display:none">Nenhum cadastro encontrado.</p>
+      </div>
+      <div class="cardx">
+        <h3>Preferências mais escolhidas</h3>
+        <canvas id="chart" height="180"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <div data-include="partials/footer.html"></div>
+  <script>
+    const KEY='SWIFT_CLUBE_MEMBERS';
+    let data = JSON.parse(localStorage.getItem(KEY)||'[]');
+    let asc=true;
+    const rows=document.getElementById('rows');
+    const q=document.getElementById('q');
+    const empty=document.getElementById('empty');
+    function render(list){
+      rows.innerHTML='';
+      if(list.length===0){ empty.style.display='block'; return } else empty.style.display='none';
+      list.forEach(x=>{
+        const tr=document.createElement('tr');
+        const dt = x.createdAt ? new Date(x.createdAt) : null;
+        tr.innerHTML = `<td>${x.nome||'-'}</td><td>${x.email||'-'}</td><td>${x.whats||'-'}</td><td>${x.cep||'-'}</td><td>${x.preferencias||'-'}</td><td>${x.consumo||'-'}</td><td>${dt? dt.toLocaleString() : '-'}</td>`;
+        rows.appendChild(tr);
+      });
+    }
+    function drawChart(list){
+      const count={}; list.forEach(x=>{ const k=(x.preferencias||'Indefinido'); count[k]=(count[k]||0)+1; });
+      const labels=Object.keys(count), vals=labels.map(k=>count[k]);
+      if(window.chart) window.chart.destroy();
+      window.chart = new Chart(document.getElementById('chart'),{
+        type:'bar', data:{ labels, datasets:[{ label:'Clientes', data:vals }]},
+        options:{ responsive:true, scales:{ y:{ beginAtZero:true, precision:0 } } }
+      });
+    }
+    function filter(){
+      const v=q.value.trim().toLowerCase();
+      const list = data.filter(x=>(`${x.nome} ${x.email} ${x.cep} ${x.whats}`||'').toLowerCase().includes(v));
+      render(list); drawChart(list);
+    }
+    document.getElementById('sort').onclick=()=>{
+      data.sort((a,b)=> asc ? new Date(a.createdAt||0)-new Date(b.createdAt||0) : new Date(b.createdAt||0)-new Date(a.createdAt||0));
+      asc=!asc; filter();
+    };
+    document.getElementById('export').onclick=()=>{
+      const hdr=['nome','email','whats','cpf','aniversario','cep','endereco','preferencias','consumo','obs','createdAt'];
+      const list=[hdr.join(',')].concat(data.map(x=> hdr.map(k=> `"${String(x[k]||'').replace(/"/g,'""')}"`).join(','))).join('\n');
+      const blob=new Blob([list],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download='clientes-clube-swift.csv'; a.click();
+    };
+    q.oninput=filter; render(data); drawChart(data);
+  </script>
+  <script src="./script/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# Arquivos locais e gerados
+.DS_Store
+Thumbs.db
+__MACOSX/
+.idea/
+.vscode/
+*.iml
+*.local
+node_modules/
+dist/
+build/
+target/
+.gradle/
+local.properties
+.env
+.env.local
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.apk
+*.aab
+google-services.json
+
+*.log
+.firebase/

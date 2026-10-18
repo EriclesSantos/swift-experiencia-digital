@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meu Carrinho</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div data-include="partials/header.html"></div>
+
+  <main class="cart-wrap">
+    <h2>Meu Carrinho</h2>
+    <div id="cart-list"></div>
+    <div class="actions">
+      <div>Subtotal: <span class="total">R$ <span id="subtotal">0,00</span></span></div>
+      <div>
+        <a class="btn" href="home.html#produtos" style="background:#eee">Continuar comprando</a>
+        <a class="btn btn-primary" href="endereco.html">Fechar pedido</a>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast"></div>
+  <div data-include="partials/footer.html"></div>
+  <script src="script/script.js"></script>
+</body>
+</html>

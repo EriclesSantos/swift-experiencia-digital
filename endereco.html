@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Swift — Endereço</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div data-include="partials/header.html"></div>
+
+  <section class="section">
+    <div class="progress-inline"><span>Carrinho</span><span class="active">Endereço</span><span>Pagamento</span></div>
+    <h3>Endereço de entrega</h3>
+    <div class="panel" style="display:flex;align-items:center;gap:14px;justify-content:space-between">
+      <div><strong>Endereço 1</strong><br>Rua Gilbatar, <b>89 - ap 32</b> — 09876-890, São Paulo/SP</div>
+      <button class="btn btn-primary" onclick="alert('Endereço selecionado!')">Entregar aqui</button>
+    </div>
+    <button class="btn" onclick="alert('Adicionar novo endereço (demo)')">+ adicionar novo endereço</button>
+
+    <h3 style="margin-top:20px">Verifique no mapa</h3>
+    <div id="map"></div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:16px">
+      <a class="next" href="pagamento.html">Próximo →</a>
+    </div>
+  </section>
+
+  <div data-include="partials/footer.html"></div>
+  <script src="script/script.js"></script>
+</body>
+</html>

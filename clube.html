@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clube Swift — Vantagens</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    :root{ --gold-1:#c89c25; --gold-2:#ffd166; --gold-3:#b58210; }
+    body{background:#000;color:#fff;font-family:Poppins,system-ui}
+    .club-hero{min-height:420px;display:flex;align-items:center;justify-content:center;
+      background-image:linear-gradient(to bottom,rgba(0,0,0,.55),rgba(0,0,0,.65)),url('https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1600&auto=format&fit=crop');
+      background-size:cover;background-position:center;border-bottom:1px solid rgba(255,209,102,.2)}
+    .club-hero .inner{max-width:1100px;margin:auto;padding:70px 16px;text-align:center}
+    .club-hero h1{font-family:Montserrat;font-size:110px;line-height:.9;margin:0 0 6px;color:transparent;-webkit-text-stroke:4px rgba(184,142,20,.95)}
+    .club-hero .swift{font-size:80px;font-weight:900;background:linear-gradient(90deg,var(--gold-1),var(--gold-2),var(--gold-3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 6px 6px rgba(0,0,0,.6))}
+    .club-hero p{color:#f4e4b1;font-size:20px;margin:6px auto 14px;max-width:860px}
+    .cta-gold{display:inline-block;background:linear-gradient(90deg,var(--gold-1),var(--gold-2),var(--gold-3));color:#000;font-weight:900;border-radius:14px;padding:14px 20px}
+    .wrap{max-width:1100px;margin:20px auto;padding:0 16px}
+    .cardx{background:#0b0b0b;border:1px solid rgba(255,209,102,.18);border-radius:16px;padding:16px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+    h2,h3{font-family:Montserrat;color:var(--gold-2);margin:.3rem 0 .6rem}
+    ul.benef{margin:.4rem 0 0 1rem}
+  </style>
+</head>
+<body>
+  <div data-include="partials/header.html"></div>
+
+  <section class="club-hero">
+    <div class="inner">
+      <h1>CLUBE</h1>
+      <div class="swift">Swift</div>
+      <p>Cashback, Dia do Clube, combos exclusivos, frete inteligente e prioridade em lançamentos — visual premium, benefícios reais.</p>
+      <a class="cta-gold" href="./clube-cadastro.html" data-join-clube>Quero fazer parte — R$ 19,90/mês</a>
+    </div>
+  </section>
+  
+  <main class="wrap">
+    <div class="grid-2">
+      <div class="cardx">
+        <h2>Como funciona o Clube</h2>
+        <p>Assine com poucos cliques. Receba um ID do Clube e seus benefícios ficam <b>ativos automaticamente</b> no carrinho e na área “Minha Conta”.</p>
+        <ul>
+          <li><b>Cashback inteligente:</b> a cada R$100, você ganha R$10 em créditos.</li>
+          <li><b>Dia do Clube 2x/mês:</b> 10% OFF em carnes selecionadas.</li>
+          <li><b>Combos do mês:</b> acesso antecipado a kits com preço especial.</li>
+          <li><b>Fidelidade Bronze/Prata/Ouro:</b> benefícios progressivos.</li>
+          <li><b>Entrega & rastreio:</b> frete grátis a partir de R$199 (regiões) e cupom se atrasar.</li>
+        </ul>
+      </div>
+      <div class="cardx">
+        <h2>Por que assinar?</h2>
+        <ul class="benef">
+          <li>Economia anual com descontos e cashback.</li>
+          <li>Ofertas personalizadas por preferência de corte.</li>
+          <li>Prioridade em lançamentos e datas especiais.</li>
+          <li>Mimo de aniversário no mês do seu niver.</li>
+          <li>“Indique e Ganhe”: R$10 por amigo que comprar.</li>
+        </ul>
+        <p style="margin-top:10px">
+          <a class="cta-gold" href="./clube-cadastro.html" data-join-clube>Fazer parte agora</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <div data-include="partials/footer.html"></div>
+  <script src="./script/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha Conta — Swift</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    .account-wrap{max-width:1200px;margin:1rem auto;padding:0 1rem}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .kpi{background:#f8fafc;border:1px solid #eef0f2;border-radius:14px;padding:14px}
+    .kpi .lbl{color:#666}.kpi .val{font-weight:900;font-size:1.4rem;margin-top:4px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+    .stat{background:#fff;border:1px solid #eee;border-radius:12px;padding:12px;text-align:center}
+    .panel{background:#fff;border:1px solid #eee;border-radius:14px;padding:14px;box-shadow:0 10px 24px rgba(0,0,0,.05)}
+    .tabs{display:flex;gap:8px;margin:14px 0}
+    .tab{border:1px solid #e3e6ea;background:#fff;border-radius:10px;padding:.5rem .8rem;font-weight:700}
+    .tab.active{background:#e64a19;color:#fff;border-color:#e64a19}
+    table.table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    table.table th,table.table td{background:#fff;border:1px solid #eee;padding:10px;text-align:left}
+    table.table th{background:#f5f6f8}
+    @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div data-include="partials/header.html"></div>
+
+  <div class="account-wrap">
+    <h2 style="margin:6px 0 12px">Olá, <strong id="nomeCli">Cliente Swift</strong> 👋</h2>
+
+    <div class="kpis">
+      <div class="kpi"><div class="lbl">Gasto neste mês</div><div class="val" id="kpi-month">R$ --</div><div class="sub" id="kpi-month-var">–</div></div>
+      <div class="kpi"><div class="lbl">Economia (Clube)</div><div class="val" id="kpi-savings">R$ --</div><div class="sub">Cashback + descontos</div></div>
+      <div class="kpi"><div class="lbl">Pedidos no mês</div><div class="val" id="kpi-orders">--</div><div class="sub" id="kpi-avg">Ticket médio: --</div></div>
+      <div class="kpi"><div class="lbl">Projeção anual</div><div class="val" id="kpi-proj">R$ --</div><div class="sub">com Clube Swift</div></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div>Entregues</div><div style="font-weight:900;font-size:1.6rem" id="s-entregues">0</div></div>
+      <div class="stat"><div>Em rota</div><div style="font-weight:900;font-size:1.6rem" id="s-emrota">0</div></div>
+      <div class="stat"><div>Cancelados</div><div style="font-weight:900;font-size:1.6rem" id="s-cancel">0</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="visao">Visão geral</button>
+      <button class="tab" data-tab="pedidos">Pedidos</button>
+      <button class="tab" data-tab="beneficios">Benefícios</button>
+    </div>
+
+    <div id="tab-visao" class="panel">
+      <div style="display:grid;grid-template-columns:1.2fr .8fr;gap:16px">
+        <div class="panel">
+          <h3 style="margin:0 0 10px">Gasto mensal x Economia</h3>
+          <canvas id="chartMonthly" height="120"></canvas>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0 0 10px">Categorias mais compradas</h3>
+          <canvas id="chartCats" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-pedidos" class="panel" style="display:none">
+      <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="exportCSV()" style="background:#eee;border-radius:10px">Exportar CSV</button>
+        <a class="btn btn-primary" href="./rastreio.html" style="border-radius:10px">Rastrear último pedido</a>
+      </div>
+      <table class="table" id="ordersTable">
+        <thead><tr><th>Data</th><th>Pedido</th><th>Itens</th><th>Total</th><th>Economia</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="tab-beneficios" class="panel" style="display:none">
+      <h3 style="margin:0 0 10px">Clube Swift — níveis e vantagens</h3>
+      <ul>
+        <li><strong>Bronze</strong> (R$ 0 – 1.999): 2% OFF + Combo do Mês.</li>
+        <li><strong>Prata</strong> (R$ 2.000 – 4.999): 5% OFF + frete grátis 299+.</li>
+        <li><strong>Ouro</strong> (R$ 5.000+): 8% OFF + frete + prioridade.</li>
+      </ul>
+      <p>Seu desconto atual: <strong id="perkNow">2%</strong>.</p>
+    </div>
+  </div>
+
+  <div data-include="partials/footer.html"></div>
+  <script src="./script/script.js"></script>
+  <script>
+    const ORDERS_KEY = 'swift_orders_v1';
+    if(!localStorage.getItem(ORDERS_KEY)){
+      const seed=[
+        {id:10328, date:'2025-09-30', items:[{name:'Picanha',qty:2},{name:'Cerva',qty:6}], total:238.70, save:18.70, status:'Em rota'},
+        {id:10293, date:'2025-09-22', items:[{name:'Ancho',qty:1},{name:'Linguiça',qty:2}], total:189.90, save:9.90, status:'Entregue'},
+        {id:10210, date:'2025-08-18', items:[{name:'Coxa/ Sobrecoxa',qty:3}], total:214.40, save:12.00, status:'Entregue'},
+        {id:10167, date:'2025-07-25', items:[{name:'Costelinha',qty:1}], total:142.50, save:8.00, status:'Entregue'},
+        {id:10122, date:'2025-06-12', items:[{name:'Salmão',qty:1}], total:171.30, save:7.50, status:'Entregue'},
+        {id:10088, date:'2025-05-28', items:[{name:'Burger Vegetal',qty:2}], total:256.10, save:10.00, status:'Cancelado'}
+      ];
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(seed));
+    }
+    const orders = JSON.parse(localStorage.getItem(ORDERS_KEY)||'[]');
+
+    const mesAtual = new Date().toISOString().slice(0,7);
+    const gastosDoMes = orders.filter(o=>o.date.startsWith(mesAtual)).reduce((s,o)=>s+o.total,0);
+    const pedidosDoMes = orders.filter(o=>o.date.startsWith(mesAtual)).length;
+    const economiaTotal = orders.reduce((s,o)=>s+o.save,0);
+    const ticket = pedidosDoMes? (gastosDoMes/pedidosDoMes) : 0;
+    const ult3 = [...orders].sort((a,b)=> new Date(b.date)-new Date(a.date)).slice(0,3).reduce((s,o)=>s+o.total,0)/3 || 0;
+    const projAnual = (ult3*12)*0.92;
+
+    document.getElementById('kpi-month').textContent = 'R$ ' + gastosDoMes.toFixed(2).replace('.',',');
+    document.getElementById('kpi-savings').textContent = 'R$ ' + economiaTotal.toFixed(2).replace('.',',');
+    document.getElementById('kpi-orders').textContent = String(pedidosDoMes);
+    document.getElementById('kpi-avg').textContent = 'Ticket médio: R$ ' + ticket.toFixed(2).replace('.',',');
+    document.getElementById('kpi-proj').textContent = 'R$ ' + projAnual.toFixed(2).replace('.',',');
+
+    document.getElementById('s-entregues').textContent = orders.filter(o=>o.status==='Entregue').length;
+    document.getElementById('s-emrota').textContent    = orders.filter(o=>o.status==='Em rota').length;
+    document.getElementById('s-cancel').textContent    = orders.filter(o=>o.status==='Cancelado').length;
+
+    const nm = localStorage.getItem('SWIFT_CLUBE_NAME');
+    if(nm) document.getElementById('nomeCli').textContent = nm;
+
+    const tbody=document.querySelector('#ordersTable tbody'); tbody.innerHTML='';
+    orders.sort((a,b)=> new Date(b.date)-new Date(a.date)).forEach(o=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td>${o.date.split('-').reverse().join('/')}</td>
+        <td>#${o.id}</td>
+        <td>${o.items.map(i=>`${i.name} x${i.qty}`).join(', ')}</td>
+        <td>R$ ${o.total.toFixed(2).replace('.',',')}</td>
+        <td>R$ ${o.save.toFixed(2).replace('.',',')}</td>
+        <td>${o.status}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    const byMonth={};
+    orders.forEach(o=>{
+      const k=o.date.slice(0,7);
+      byMonth[k]=byMonth[k]||{g:0,e:0};
+      byMonth[k].g+=o.total; byMonth[k].e+=o.save;
+    });
+    const labels=Object.keys(byMonth).sort();
+    new Chart(document.getElementById('chartMonthly'),{
+      type:'bar',
+      data:{labels,datasets:[{label:'Gasto',data:labels.map(k=>byMonth[k].g)},{label:'Economia',data:labels.map(k=>byMonth[k].e)}]},
+      options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}
+    });
+    const catCount={};
+    const guess = n=>/picanha|ancho|costelinha|lingui/i.test(n)?'Carnes':/salm[aã]o|peixe/i.test(n)?'Pescados':/cerva|heineken|cola|água|agua|suco|vinho/i.test(n)?'Bebidas':/burger|vegetal/i.test(n)?'Vegetal/Snacks':'Outros';
+    orders.forEach(o=>o.items.forEach(i=>{catCount[guess(i.name)]=(catCount[guess(i.name)]||0)+i.qty;}));
+    new Chart(document.getElementById('chartCats'),{type:'doughnut',data:{labels:Object.keys(catCount),datasets:[{data:Object.values(catCount)}]},options:{plugins:{legend:{position:'bottom'}}}});
+
+    bootTabs();
+
+    window.exportCSV = ()=>{
+      const rows=[['data','pedido','itens','total','economia','status']];
+      orders.forEach(o=>rows.push([o.date,o.id,o.items.map(i=>`${i.name} (x${i.qty})`).join(' | '),o.total,o.save,o.status]));
+      const csv=rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='swift_pedidos.csv'; a.click();
+    };
+  </script>
+</body>
+</html>
