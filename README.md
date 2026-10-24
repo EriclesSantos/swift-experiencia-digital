@@ -44,8 +44,6 @@ O assistente é baseado em regras, sem modelo de IA generativa. Compras, pagamen
 
 </details>
 
-Todas as capturas foram obtidas executando os arquivos deste repositório no navegador. Conteúdo e indicadores são demonstrativos.
-
 ## Executar
 
 Com Python 3 instalado, na raiz do projeto:
